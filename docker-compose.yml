@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: crawl_db
+    ports:
+      - "3306:3306"
+
+  crawl_service:
+    build:
+      context: .
+      dockerfile: crawl_service/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+    volumes:
+      - ./downloads:/app/downloads
+
+  agent_service:
+    build:
+      context: .
+      dockerfile: agent_service/Dockerfile
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+    volumes:
+      - ./downloads:/app/downloads

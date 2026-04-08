@@ -1,0 +1,11 @@
+requests
+beautifulsoup4
+SQLAlchemy
+pymysql
+python-dotenv
+langgraph
+langchain-anthropic
+langchain-mcp-adapters
+playwright
+apscheduler
+pandas

@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: noise-barrier-intel
+Version: 0.1.0
+Summary: A monorepo for crawling and agent-based data extraction.
+Requires-Dist: requests
+Requires-Dist: beautifulsoup4
+Requires-Dist: SQLAlchemy
+Requires-Dist: pymysql
+Requires-Dist: python-dotenv
+Requires-Dist: langgraph
+Requires-Dist: langchain-anthropic
+Requires-Dist: langchain-mcp-adapters
+Requires-Dist: playwright
+Requires-Dist: apscheduler
+Requires-Dist: pandas
