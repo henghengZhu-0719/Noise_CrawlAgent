@@ -9,5 +9,7 @@ def run_gd_transport():
     crawler = CrawlHtml()
     crawler.crawl_html(url_list)
 
+from crawl_service.scheduler import start_scheduler
+
 if __name__ == "__main__":
-    run_gd_transport()
+    start_scheduler()

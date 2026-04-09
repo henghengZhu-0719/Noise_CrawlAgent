@@ -1,32 +1,27 @@
 version: '3.8'
 services:
-  db:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: crawl_db
-    ports:
-      - "3306:3306"
-
   crawl_service:
+    platform: linux/arm64
     build:
       context: .
       dockerfile: crawl_service/Dockerfile
-    depends_on:
-      - db
     environment:
-      - DB_HOST=db
+      - DB_HOST=host.docker.internal
+      # 如果需要，这里可以覆盖默认配置
+      # - DB_PORT=3306
+      # - DB_USER=root
+      # - DB_PASSWORD=020110
+      # - DB_NAME=gdee
     volumes:
       - ./downloads:/app/downloads
 
   agent_service:
+    platform: linux/arm64
     build:
       context: .
       dockerfile: agent_service/Dockerfile
-    depends_on:
-      - db
     environment:
-      - DB_HOST=db
+      - DB_HOST=host.docker.internal
       - MINIMAX_API_KEY=${MINIMAX_API_KEY}
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
     volumes:
