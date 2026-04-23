@@ -13,11 +13,14 @@ dependencies = [
     "pymysql",
     "python-dotenv",
     "langgraph",
+    "langchain",
     "langchain-anthropic",
     "langchain-mcp-adapters",
     "playwright",
     "apscheduler",
-    "pandas"
+    "pandas",
+    "pydantic",
+    "typing_extensions"
 ]
 
 [tool.setuptools.packages.find] 

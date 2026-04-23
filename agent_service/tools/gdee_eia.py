@@ -66,8 +66,6 @@ class CrawlGdee:
         """替换文件名中的非法字符，避免路径解析错误"""
         return re.sub(r'[/\\:*?"<>|]', '_', name)
 
-    # ✅ 已删除 compose_search_query，query 由上游直接传入
-
     # Playwright 生命周期
     def start(self):
         """启动 Playwright，创建浏览器实例"""
@@ -156,7 +154,7 @@ class CrawlGdee:
         results = self._parse_results()
         total_pages = self._get_total_pages()
 
-        print(f"    ✓ 本页 {len(results)} 条，共 {total_pages} 页")
+        print(f" 本页 {len(results)} 条，共 {total_pages} 页")
         return results, total_pages
 
     def fetch_all_pages(self, query: str, max_pages: int = 10) -> list[dict]:
@@ -173,7 +171,7 @@ class CrawlGdee:
             results, _ = self.fetch_one_page(query, page=p)
             all_results.extend(results)
 
-        print(f"  ✓ 共抓取 {len(all_results)} 条结果")
+        print(f"共抓取 {len(all_results)} 条结果")
         return all_results
 
     # 文件下载
@@ -210,7 +208,7 @@ class CrawlGdee:
         """
         self.start()
         try:
-            for query in self.items:  # ✅ item 直接就是 query 字符串
+            for query in self.items:  
                 # 断点续传：跳过已抓取的关键词
                 if query in self.crawled_projects:
                     print(f"\n[{query}] 已抓取过，跳过...")
@@ -263,6 +261,6 @@ def run_search_agent(title: str, search_prompt: str) -> list[dict]:
 if __name__ == "__main__":
     # 批量模式：从 CSV 读取关键词列表
     projects = pd.read_csv("/root/myblog/crawl/agent_output.csv")
-    queries = projects["query"].dropna().tolist()  # ✅ 直接取 query 列
+    queries = projects["query"].dropna().tolist()  
     crawler = CrawlGdee(items=queries)
     crawler.run()

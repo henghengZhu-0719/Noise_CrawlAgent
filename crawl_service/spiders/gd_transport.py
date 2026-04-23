@@ -6,12 +6,14 @@ import time
 import sys
 from bs4 import BeautifulSoup
 from pathlib import Path
-
-# Add project root to sys.path to allow importing backend
 import requests
+
 from backend.models.news_urls import NewsURL
 from backend.database import SessionLocal
+from crawl_service.log_service import logger
 
+
+from datetime import datetime
 
 BASE_URL = "https://td.gd.gov.cn"
 SOURCE   = "广东省交通运输厅"
@@ -36,7 +38,7 @@ class CrawlHtml:
             resp.raise_for_status()
             return resp.text
         except Exception as e:
-            print(f"请求失败: {url} → {e}")
+            logger.error(f"请求失败: {url} → {e}")
             return None
 
     def _parse_news_items(self, html: str) -> list[dict]:
@@ -70,8 +72,6 @@ class CrawlHtml:
 
         return items
 
-    
-
     def _save_to_db(self, items: list[dict]) -> tuple[int, int]:
         added, skipped = 0, 0
         db = SessionLocal()  # 直接创建 session
@@ -84,10 +84,20 @@ class CrawlHtml:
                     skipped += 1
                     continue
 
+                publish_date = None
+                if item["date"]:
+                    try:
+                        publish_date = datetime.strptime(item["date"], "%Y-%m-%d")
+                    except ValueError:
+                        pass
+
                 db.add(NewsURL(
                     url=item["url"],
                     title=item["title"][:255],
                     content="",
+                    source=SOURCE,
+                    publish_date=publish_date,
+                    crawl_status=0,
                     is_relevant=None,
                 ))
                 existing_urls.add(item["url"])
@@ -97,7 +107,7 @@ class CrawlHtml:
 
         except Exception as e:
             db.rollback()
-            print(f"数据库写入失败: {e}")
+            logger.error(f"数据库写入失败: {e}")
             raise
 
         finally:
@@ -109,36 +119,26 @@ class CrawlHtml:
 
         for idx, url in enumerate(url_list, start=1):
             time.sleep(random.uniform(10, 20))
-            print(f"\n[{idx}/{len(url_list)}] 正在处理: {url}")
+            logger.info(f"\n[{idx}/{len(url_list)}] 正在处理: {url}")
 
             html = self._fetch(url)
             if not html:
                 continue
 
-            # 保存列表页 HTML（中间产物）
             html_name = url.split('/')[-1]
             (self.output_dir / html_name).write_text(html, encoding="utf-8")
 
             items = self._parse_news_items(html)
             if not items:
-                print(f"未解析到新闻，请检查选择器")
+                logger.warning(f"未解析到新闻，请检查选择器")
                 continue
-            print(f"解析到 {len(items)} 条新闻")
+            logger.info(f"解析到 {len(items)} 条新闻")
 
             added, skipped = self._save_to_db(items)
-            print(f"新增 {added} 条，跳过 {skipped} 条（已存在）")
+            logger.info(f"新增 {added} 条，跳过 {skipped} 条（已存在）")
 
             all_results.extend(items)
 
-        print(f"\n全部完成，共处理 {len(all_results)} 条新闻 URL")
+        logger.info(f"全部完成，共处理 {len(all_results)} 条新闻 URL")
         return all_results
 
-
-if __name__ == "__main__":
-    url_list = ["https://td.gd.gov.cn/zwgk_n/jslyxxgk/xmgs/index.html"]
-    for i in range(2, 3):
-        url_list.append(f"https://td.gd.gov.cn/zwgk_n/jslyxxgk/xmgs/index_{i}.html")
-
-    crawler = CrawlHtml()
-    results = crawler.crawl_html(url_list)
-    print(results)

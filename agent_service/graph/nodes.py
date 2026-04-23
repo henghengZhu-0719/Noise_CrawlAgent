@@ -7,7 +7,7 @@ from agent_service.agents.factory import create_search_agent, create_download_ag
 from agent_service.prompts.filter_prompt import FILTER_PROMPT
 from agent_service.prompts.extract_prompt import EXTRACT_PROMPT
 from agent_service.prompts.download_prompt import DOWNLOAD_PROMPT
-from crawl_service.spiders.gdee_eia import run_search_agent
+from agent_service.tools.gdee_eia import run_search_agent
 
 
 def crawl_node(state: PipelineState):
